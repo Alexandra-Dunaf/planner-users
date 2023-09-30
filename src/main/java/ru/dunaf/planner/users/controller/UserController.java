@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.dunaf.planner.entity.User;
 import ru.dunaf.planner.users.search.UserSearchValues;
 import ru.dunaf.planner.users.service.UserService;
-import ru.dunaf.planner.utils.webclient.UserWebClientBuilder;
+import ru.dunaf.planner.utils.rest.webclient.UserWebClientBuilder;
 
 import java.text.ParseException;
 import java.util.NoSuchElementException;
