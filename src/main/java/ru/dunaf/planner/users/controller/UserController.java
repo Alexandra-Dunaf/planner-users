@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.dunaf.planner.entity.User;
 import ru.dunaf.planner.users.search.UserSearchValues;
 import ru.dunaf.planner.users.service.UserService;
+import ru.dunaf.planner.utils.webclient.UserWebClientBuilder;
 
 import java.text.ParseException;
 import java.util.NoSuchElementException;
@@ -36,16 +37,17 @@ public class UserController {
     public static final String ID_COLUMN = "id"; // имя столбца id
     private final UserService userService; // сервис для доступа к данным (напрямую к репозиториям не обращаемся)
 
+    private final UserWebClientBuilder userWebClientBuilder;
 
     // используем автоматическое внедрение экземпляра класса через конструктор
     // не используем @Autowired ля переменной класса, т.к. "Field injection is not recommended "
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder) {
         this.userService = userService;
+        this.userWebClientBuilder = userWebClientBuilder;
     }
 
 
     // добавление
-    @PostMapping("/add")
     public ResponseEntity<User> add(@RequestBody User user) {
 
         // проверка на обязательные параметры
@@ -67,7 +69,18 @@ public class UserController {
             return new ResponseEntity("missed param: username", HttpStatus.NOT_ACCEPTABLE);
         }
 
-        return ResponseEntity.ok(userService.add(user)); // возвращаем созданный объект со сгенерированным id
+        // добавляем пользователя
+        user = userService.add(user);
+
+        if (user != null) {
+            // заполняем начальные данные пользователя (в параллелном потоке)
+            userWebClientBuilder.initUserData(user.getId()).subscribe(result -> {
+                        System.out.println("user populated: " + result);
+                    }
+            );
+        }
+
+        return ResponseEntity.ok(user); // возвращаем созданный объект со сгенерированным id
 
     }
 
