@@ -27,6 +27,7 @@ import ru.dunaf.planner.users.service.UserService;
 
 import java.text.ParseException;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/user") // базовый URI
@@ -137,19 +138,20 @@ public class UserController {
     @PostMapping("/id")
     public ResponseEntity<User> findById(@RequestBody Long id) {
 
-        User user = null;
+        Optional<User> userOptional = userService.findById(id);
 
         // можно обойтись и без try-catch, тогда будет возвращаться полная ошибка (stacktrace)
         // здесь показан пример, как можно обрабатывать исключение и отправлять свой текст/статус
         try {
-            user = userService.findById(id);
-        } catch (NoSuchElementException e) { // если объект не будет найден
-            e.printStackTrace();
+            if (userOptional.isPresent()) {  // если объект найден
+                return ResponseEntity.ok(userOptional.get()); // получаем User из контейнера и возвращаем в теле ответа
+            }} catch(NoSuchElementException e){ // если объект не будет найден
+                e.printStackTrace();
+            }
             return new ResponseEntity("id=" + id + " not found", HttpStatus.NOT_ACCEPTABLE);
         }
 
-        return ResponseEntity.ok(user);
-    }
+
 
     // получение уникального объекта по email
     @PostMapping("/email")
