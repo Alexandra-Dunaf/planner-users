@@ -22,7 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.dunaf.planner.entity.User;
-import ru.dunaf.planner.users.mq.MessageProducer;
+import ru.dunaf.planner.users.legacy.MessageProducer;
 import ru.dunaf.planner.users.search.UserSearchValues;
 import ru.dunaf.planner.users.service.UserService;
 import ru.dunaf.planner.utils.rest.webclient.UserWebClientBuilder;
