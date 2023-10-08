@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableDiscoveryClient
 @ComponentScan(basePackages = {"ru.dunaf.planner"})
 @EnableJpaRepositories(basePackages = {"ru.dunaf.planner.users"})
+
 public class PlannerUsersApplication {
 
     public static void main(String[] args) {

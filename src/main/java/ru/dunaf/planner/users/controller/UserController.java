@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.dunaf.planner.entity.User;
+import ru.dunaf.planner.users.mq.MessageProducer;
 import ru.dunaf.planner.users.search.UserSearchValues;
 import ru.dunaf.planner.users.service.UserService;
 import ru.dunaf.planner.utils.rest.webclient.UserWebClientBuilder;
@@ -39,11 +40,14 @@ public class UserController {
 
     private final UserWebClientBuilder userWebClientBuilder;
 
+    private MessageProducer messageProducer; // утилита для отправки сообщений
+
     // используем автоматическое внедрение экземпляра класса через конструктор
     // не используем @Autowired ля переменной класса, т.к. "Field injection is not recommended "
-    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder) {
+    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder, MessageProducer messageProducer) {
         this.userService = userService;
         this.userWebClientBuilder = userWebClientBuilder;
+        this.messageProducer = messageProducer;
     }
 
 
@@ -72,12 +76,17 @@ public class UserController {
         // добавляем пользователя
         user = userService.add(user);
 
-        if (user != null) {
-            // заполняем начальные данные пользователя (в параллелном потоке)
-            userWebClientBuilder.initUserData(user.getId()).subscribe(result -> {
-                        System.out.println("user populated: " + result);
-                    }
-            );
+//        if (user != null) {
+//            // заполняем начальные данные пользователя (в параллелном потоке)
+//            userWebClientBuilder.initUserData(user.getId()).subscribe(result -> {
+//                        System.out.println("user populated: " + result);
+//                    }
+//            );
+//        }
+
+
+        if (user != null) { // если пользователь добавился
+            messageProducer.initUserData(user.getId()); // отправляем сообщение в канал
         }
 
         return ResponseEntity.ok(user); // возвращаем созданный объект со сгенерированным id
