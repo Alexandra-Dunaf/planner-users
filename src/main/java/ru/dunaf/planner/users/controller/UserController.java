@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import ru.dunaf.planner.entity.User;
 import ru.dunaf.planner.users.func.MessageFuncActions;
@@ -35,6 +36,7 @@ import java.util.Optional;
 @RequestMapping("/user") // базовый URI
 public class UserController {
 
+    private final static String TOPIC_NAME = "test";
     public static final String ID_COLUMN = "id"; // имя столбца id
     private final UserService userService; // сервис для доступа к данным (напрямую к репозиториям не обращаемся)
 
@@ -42,20 +44,24 @@ public class UserController {
 
     // для отправки сообщения по требованию (реализовано с помощью функц. кода)
     private MessageFuncActions messageFuncActions;
+
+    private KafkaTemplate<String, Long> kafkaTemplate;
 //
 //    private MessageProducer messageProducer; // утилита для отправки сообщений
 
     // используем автоматическое внедрение экземпляра класса через конструктор
     // не используем @Autowired ля переменной класса, т.к. "Field injection is not recommended "
-    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder,/*MessageProducer messageProducer*/MessageFuncActions messageFuncActions) {
+    public UserController(UserService userService, UserWebClientBuilder userWebClientBuilder,/*MessageProducer messageProducer*/MessageFuncActions messageFuncActions, KafkaTemplate<String, Long> kafkaTemplate) {
         this.userService = userService;
         this.userWebClientBuilder = userWebClientBuilder;
 //        this.messageProducer = messageProducer;
         this.messageFuncActions = messageFuncActions;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
     // добавление
+    @PostMapping("/add")
     public ResponseEntity<User> add(@RequestBody User user) {
 
         // проверка на обязательные параметры
@@ -94,7 +100,8 @@ public class UserController {
 //        }
 
         if (user != null) { // если пользователь добавился
-            messageFuncActions.sendNewUserMessage(user.getId()); // отправляем сообщение в канал
+//            messageFuncActions.sendNewUserMessage(user.getId()); // отправляем сообщение в канал
+            kafkaTemplate.send(TOPIC_NAME, user.getId());
         }
 
         return ResponseEntity.ok(user); // возвращаем созданный объект со сгенерированным id

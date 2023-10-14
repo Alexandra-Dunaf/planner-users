@@ -35,9 +35,10 @@ dependencies {
     implementation 'ru.dunaf.planner:planner-entity'
     implementation 'ru.dunaf.planner:planner-utils'
 
-    implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit:+'
+//    implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit:+'
 // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-stream
-    implementation 'org.springframework.cloud:spring-cloud-stream:4.0.4'
+    //implementation 'org.springframework.cloud:spring-cloud-stream:4.0.4'
+    implementation 'org.springframework.kafka:spring-kafka'
 
 
 }
